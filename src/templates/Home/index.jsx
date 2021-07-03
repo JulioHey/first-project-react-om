@@ -1,4 +1,8 @@
-import { Component } from "react";
+import { 
+  useEffect, 
+  useState,
+  useCallback
+} from "react";
 
 import "./styles.css";
 
@@ -7,92 +11,86 @@ import { Button } from "../../components/Button";
 import { TextInput } from "../../components/TextInput";
 import { loadPosts } from "../../utils/load-posts";
 
-class Home extends Component {
-  state = {
-    posts: [],
-    allPosts: [],
-    page: 0,
-    postsPerPage: 10,
-    searchValue: "",
-  };
+const Home = () => {
+  // state = {
+  //   posts: [],
+  //   allPosts: [],
+  //   page: 0,
+  //   postsPerPage: 10,
+  //   searchValue: "",
+  // };
 
-  async componentDidMount() {
-    await this.loadPosts();
-  }
+  const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
 
-  componentDidUpdate() {
-    console.log('Props:', this.props);
-  }
+  const postsPerPage = 10;
 
-  loadPosts = async () => {
+  const handleLoadPosts = useCallback(async (postsPerPage) => {
     const postsAndPhotos = await loadPosts();
-    this.setState({
-      posts: postsAndPhotos.slice(0, this.state.postsPerPage),
-      allPosts: postsAndPhotos,
-    });
-  };
 
-  loadMorePosts = () => {
-    const { page, postsPerPage, allPosts } = this.state;
+    setPosts(postsAndPhotos.slice(0, postsPerPage));
+    setAllPosts(postsAndPhotos);
+  }, []);
 
+  useEffect(() => {
+    handleLoadPosts(postsPerPage);
+  }, [postsPerPage, handleLoadPosts]);
+
+  const loadMorePosts = () => {
     const newPage = page + 1;
-    this.setState({
-      page: newPage,
-      postsPerPage: postsPerPage,
-      allPosts: allPosts,
-      posts: allPosts.slice(0, (newPage + 1) * postsPerPage),
-    });
+
+    setPosts(allPosts.slice(0, (newPage + 1) * postsPerPage));
+    setPage(newPage);
   };
 
-  handleChange = (e) => {
-    this.setState({
-      searchValue: e.target.value,
-    });
+  const handleChange = (e) => {
+    setSearchValue(e.target.value);
   };
 
-  render() {
-    const { searchValue, allPosts, posts, postsPerPage, page } = this.state;
+  const filteredPosts = !!searchValue
+    ? posts.filter((post) => {
+        return post.title.toLowerCase().includes(searchValue.toLowerCase());
+      })
+    : posts;
+  return (
+    <section className="container">
+      <div
+        className="search-container"
+      >
+        {!!searchValue && 
+          <h1>Search Value: {searchValue}</h1>
+        }
+        <TextInput 
+          searchValue={searchValue} 
+          handleChange={handleChange} 
+        />
+      </div>
+     
 
-    const filteredPosts = !!searchValue
-      ? posts.filter((post) => {
-          return post.title.toLowerCase().includes(searchValue.toLowerCase());
-        })
-      : posts;
-
-    return (
-      <section className="container">
-        <div
-          className="search-container"
-        >
-          {!!searchValue && 
-            <h1>Search Value: {searchValue}</h1>
-          }
-          <TextInput 
-            searchValue={searchValue} 
-            handleChange={this.handleChange} 
+      {filteredPosts.length > 0 ? (
+        <Posts posts={filteredPosts} />
+      ) : (
+        <p>Não existem posts!</p>
+      )}
+      <div className="button-container">
+        {!searchValue && (
+          <Button
+            onClick={loadMorePosts}
+            text="Load More Posts"
+            disabled={
+              (page + 1) * postsPerPage >= allPosts.length ? true : false
+            }
           />
-        </div>
-       
-
-        {filteredPosts.length > 0 ? (
-          <Posts posts={filteredPosts} />
-        ) : (
-          <p>Não existem posts!</p>
         )}
-        <div className="button-container">
-          {!searchValue && (
-            <Button
-              onClick={this.loadMorePosts}
-              text="Load More Posts"
-              disabled={
-                (page + 1) * postsPerPage >= allPosts.length ? true : false
-              }
-            />
-          )}
-        </div>
-      </section>
-    );
-  }
+      </div>
+    </section>
+  );
 }
+//       </section>
+//     );
+//   }
+// }
 
 export default Home;
