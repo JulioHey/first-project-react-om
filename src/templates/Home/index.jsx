@@ -12,14 +12,6 @@ import { TextInput } from "../../components/TextInput";
 import { loadPosts } from "../../utils/load-posts";
 
 const Home = () => {
-  // state = {
-  //   posts: [],
-  //   allPosts: [],
-  //   page: 0,
-  //   postsPerPage: 10,
-  //   searchValue: "",
-  // };
-
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
   const [page, setPage] = useState(0);
@@ -88,9 +80,5 @@ const Home = () => {
     </section>
   );
 }
-//       </section>
-//     );
-//   }
-// }
 
 export default Home;
