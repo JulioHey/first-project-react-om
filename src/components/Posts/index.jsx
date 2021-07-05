@@ -23,6 +23,6 @@ Posts.propTypes = {
       body: P.string.isRequired,
       cover: P.string.isRequired,
       id: P.number.isRequired,
-    })
+    }),
   ),
 };

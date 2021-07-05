@@ -5,14 +5,14 @@ import { TextInput } from '.';
 
 describe('<TextInput />', () => {
   it('should have value of search value', () => {
-    render(<TextInput searchValue="testando" />);
+    render(<TextInput searchValue="testando" handleChange={jest.fn()} />);
 
     const input = screen.getByPlaceholderText(/type your search/i);
 
     expect(input.value).toBe('testando');
   });
 
-  it('should change value when typedu', () => {
+  it('should change value when typed', () => {
     const fn = jest.fn();
     render(<TextInput handleChange={fn} />);
 

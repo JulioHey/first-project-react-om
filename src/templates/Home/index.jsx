@@ -7,13 +7,13 @@ import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
 import { loadPosts } from '../../utils/load-posts';
 
-const Home = () => {
+export const Home = () => {
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [searchValue, setSearchValue] = useState('');
 
-  const postsPerPage = 10;
+  const postsPerPage = 2;
 
   const handleLoadPosts = useCallback(async (postsPerPage) => {
     const postsAndPhotos = await loadPosts();
@@ -62,5 +62,3 @@ const Home = () => {
     </section>
   );
 };
-
-export default Home;
