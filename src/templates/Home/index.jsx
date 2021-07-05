@@ -1,21 +1,17 @@
-import { 
-  useEffect, 
-  useState,
-  useCallback
-} from "react";
+import { useEffect, useState, useCallback } from 'react';
 
-import "./styles.css";
+import './styles.css';
 
-import { Posts } from "../../components/Posts";
-import { Button } from "../../components/Button";
-import { TextInput } from "../../components/TextInput";
-import { loadPosts } from "../../utils/load-posts";
+import { Posts } from '../../components/Posts';
+import { Button } from '../../components/Button';
+import { TextInput } from '../../components/TextInput';
+import { loadPosts } from '../../utils/load-posts';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
   const [page, setPage] = useState(0);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
   const postsPerPage = 10;
 
@@ -41,44 +37,30 @@ const Home = () => {
     setSearchValue(e.target.value);
   };
 
-  const filteredPosts = !!searchValue
+  const filteredPosts = searchValue
     ? posts.filter((post) => {
         return post.title.toLowerCase().includes(searchValue.toLowerCase());
       })
     : posts;
   return (
     <section className="container">
-      <div
-        className="search-container"
-      >
-        {!!searchValue && 
-          <h1>Search Value: {searchValue}</h1>
-        }
-        <TextInput 
-          searchValue={searchValue} 
-          handleChange={handleChange} 
-        />
+      <div className="search-container">
+        {!!searchValue && <h1>Search Value: {searchValue}</h1>}
+        <TextInput searchValue={searchValue} handleChange={handleChange} />
       </div>
-     
 
-      {filteredPosts.length > 0 ? (
-        <Posts posts={filteredPosts} />
-      ) : (
-        <p>Não existem posts!</p>
-      )}
+      {filteredPosts.length > 0 ? <Posts posts={filteredPosts} /> : <p>Não existem posts!</p>}
       <div className="button-container">
         {!searchValue && (
           <Button
             onClick={loadMorePosts}
             text="Load More Posts"
-            disabled={
-              (page + 1) * postsPerPage >= allPosts.length ? true : false
-            }
+            disabled={(page + 1) * postsPerPage >= allPosts.length ? true : false}
           />
         )}
       </div>
     </section>
   );
-}
+};
 
 export default Home;
