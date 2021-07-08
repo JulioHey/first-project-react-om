@@ -1,64 +1,97 @@
-import { useEffect, useState, useCallback } from 'react';
-
+import { useEffect, useState, useRef } from 'react';
 import './styles.css';
 
-import { Posts } from '../../components/Posts';
-import { Button } from '../../components/Button';
-import { TextInput } from '../../components/TextInput';
-import { loadPosts } from '../../utils/load-posts';
+const isObjectEqual = (objA, objB) => {
+  return JSON.stringify(objA) == JSON.stringify(objB);
+};
 
-export const Home = () => {
-  const [posts, setPosts] = useState([]);
-  const [allPosts, setAllPosts] = useState([]);
-  const [page, setPage] = useState(0);
-  const [searchValue, setSearchValue] = useState('');
+// eslint-disable
+const useFetch = (url, options) => {
+  const [shouldPostLoad, setShouldPostLoad] = useState(false);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const postsPerPage = 2;
-
-  const handleLoadPosts = useCallback(async (postsPerPage) => {
-    const postsAndPhotos = await loadPosts();
-
-    setPosts(postsAndPhotos.slice(0, postsPerPage));
-    setAllPosts(postsAndPhotos);
-  }, []);
+  const urlRef = useRef(url);
+  const optionsRef = useRef(options);
 
   useEffect(() => {
-    handleLoadPosts(postsPerPage);
-  }, [postsPerPage, handleLoadPosts]);
+    let changed = false;
+    if (!isObjectEqual(url, urlRef.current)) {
+      urlRef.current = url;
+      changed = true;
+    }
+    if (!isObjectEqual(options, optionsRef.current)) {
+      optionsRef.current = options;
+      changed = true;
+    }
+    if (changed == true) {
+      setShouldPostLoad((s) => !s);
+    }
+  }, [url, options]);
 
-  const loadMorePosts = () => {
-    const newPage = page + 1;
+  useEffect(() => {
+    let wait = false;
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setLoading(true);
 
-    setPosts(allPosts.slice(0, (newPage + 1) * postsPerPage));
-    setPage(newPage);
+    const fectchData = async () => {
+      try {
+        const response = await fetch(urlRef.current, { signal, ...optionsRef.current });
+        const jsonResult = await response.json();
+
+        if (!wait) {
+          setResult(jsonResult);
+          setLoading(false);
+        }
+      } catch (e) {
+        if (!wait) {
+          setLoading(false);
+        }
+        console.log('My Error', e);
+      }
+    };
+
+    fectchData();
+
+    return () => {
+      wait = true;
+      controller.abort();
+    };
+  }, [shouldPostLoad]);
+
+  return [result, loading, shouldPostLoad];
+};
+
+export const Home = () => {
+  const [postId, setPostId] = useState('');
+  const [result, loading] = useFetch('https://jsonplaceholder.typicode.com/posts/' + postId, {});
+
+  const handleClick = (id) => {
+    setPostId(id);
   };
 
-  const handleChange = (e) => {
-    setSearchValue(e.target.value);
-  };
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
-  const filteredPosts = searchValue
-    ? posts.filter((post) => {
-        return post.title.toLowerCase().includes(searchValue.toLowerCase());
-      })
-    : posts;
-  return (
-    <section className="container">
-      <div className="search-container">
-        {!!searchValue && <h1>Search Value: {searchValue}</h1>}
-        <TextInput searchValue={searchValue} handleChange={handleChange} />
-      </div>
-
-      {filteredPosts.length > 0 ? <Posts posts={filteredPosts} /> : <p>Não existem posts!</p>}
-      <div className="button-container">
-        {!searchValue && (
-          <Button
-            onClick={loadMorePosts}
-            text="Load More Posts"
-            disabled={(page + 1) * postsPerPage >= allPosts.length ? true : false}
-          />
+  if (!loading && result) {
+    return (
+      <div>
+        {result.length > 0 ? (
+          result.map((p) => {
+            return (
+              <p onClick={() => handleClick(p.id)} key={p.id}>
+                {p.title}
+              </p>
+            );
+          })
+        ) : (
+          <p onClick={() => handleClick('')}>{result.title}</p>
         )}
       </div>
-    </section>
-  );
+    );
+  }
+
+  return <h1>Oi</h1>;
 };

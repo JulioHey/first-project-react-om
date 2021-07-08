@@ -25,13 +25,7 @@ module.exports = {
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
-    'array-element-newline': [
-      'error',
-      {
-        ArrayExpression: 'always',
-        ArrayPattern: { minItems: 3 },
-      },
-    ],
-    'array-bracket-newline': ['error': always'],
+    'no-unused-vars': 'off',
+    'no-useless-catch': 'off',
   },
 };
